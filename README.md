@@ -87,9 +87,9 @@ load of 100,000 TPS , that would be 21 Mb of space to host the
 references needed to process the GET.
 
 If more than 1 concurrent GET is the norm, an improvement to the store
-would be to serve the results pre-sorted, which would enable the GET
-handler to serialize directly from the backing collection without
-having to sort into a temporary collection.
+is to return the items pre-sorted. This let's the GET handler
+serialize directly from the backing collection to output stream
+without having to sort the items into a temporary collection.
 
 The first question is to determine what sort is desired. It could be
 by id, by item timestamp or by arrival timestamp.  The implementation
@@ -100,20 +100,22 @@ skip the refernces during iteration.  A RemovalListener on the ttl
 cache could explicitely remove the entries in the sorted map whenever
 invoked to keep things tidy.
 
-If the sorted property is the arrival time, another option could be to
-leverage the fact that this is the same key as the ttl cache and use
-an AtomicReferenceArray of size 2^n -1 large enough to cover the ttl
-in milliseconds (or whatever other granularity).
+If the sorted property is the arrival time, another option is to
+leverage the fact that this ttl is known in advance and can be used to
+both order and evict in the sorted cache. It cannot be used as a key
+to ensure uniqueness however so the tll cache is still needed.
 
-Each of array position, or bucket, is easily accessible by masking the
-upper bits representing the timestamp used for ordering. Storing the
-events in a ConcurrentSkipListMap yields a logN insertion time, but
-the N is bounded by the number of transactions over the slice of time
-allocated for each bucket.  For 100,000 tps hashed into a bucket for a
-1ms interval is about 1000 items: this N is very small.
+An AtomicReferenceArray of size 2^n -1 large enough to cover the ttl
+in milliseconds (or whatever other granularity) can be the backing
+store. Each array position, or bucket, is easily accessible by masking
+off the upper bits representing the timestamp used for ordering.
+Storing the events in a ConcurrentSkipListMap yields a logN insertion
+time, but the N is bounded by the number of transactions over the
+slice of time allocated for each bucket.  For 100,000 tps hashed into
+a bucket holdiong a 1ms interval results in to 100 items: this N is
+very small.
 
 What is gained by any of these options is more predictable use of
-space for many concurrent GET /items, bounded by O(2N) with N being
-the total number of items returned, instead of O(MN) with M being the
-total number of concurrent GET.
-
+space for many concurrent GET /items. The result is a O(2N) use of
+space with N being the total number of items returned, instead of
+O(MN) with M being the total number of concurrent GET.
