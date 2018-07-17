@@ -39,5 +39,4 @@ public class EventTest {
 	    Event[] ins = om.readValue("[{\"item\":{\"timestamp\":1,\"id\":2}},{\"item\":{\"timestamp\":1,\"id\":2}}]", Event[].class);
 	    assertThat(ins, equalTo(evs));
 	}
-
 }

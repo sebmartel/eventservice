@@ -17,6 +17,10 @@ public class Event {
 	public Event(@JsonProperty("item") Item item) {
 		this.item = item;
 	}
+	
+	public Event(long timestamp, long id) {
+		this.item = new Item(timestamp, id);
+	}
 
 	/**
 	 * @return the item
