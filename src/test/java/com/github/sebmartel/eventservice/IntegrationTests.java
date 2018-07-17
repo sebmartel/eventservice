@@ -47,18 +47,24 @@ public class IntegrationTests {
 
 	@Test
 	public void testPost() throws InterruptedException, ExecutionException, TimeoutException {
-		ContentResponse req = client.POST("http://localhost:8080/items").content(new StringContentProvider("hi")).send();
+		Thread.sleep(2000);
+		String ev = "{ \"item\":{ \"id\": 123, \"timestamp\": \"2016-01-01T23:01:01.000Z\" } }";
+		ContentResponse req = client.POST("http://localhost:8080/items").content(new StringContentProvider(ev)).send();
 		int status = req.getStatus();
-		assertThat(status, is(201));		
+		assertThat(status, is(201));
 	}
 	
+	@SuppressWarnings("unused")
 	@Test
-	public void testGet() throws InterruptedException, TimeoutException, ExecutionException {
-		Request request = client.GET("http://localhost:8080/items").getRequest();		
-		ContentResponse res = request.send();
-		System.out.println(res.getContentAsString());
-		assertThat(res.getStatus(), is(200));
-	}
-	
+	public void testPostAndGet() throws InterruptedException, TimeoutException, ExecutionException {
+		String ev = "{ \"item\":{ \"id\": 123, \"timestamp\": \"2016-01-01T23:01:01.000Z\" } }";
+		ContentResponse req = client.POST("http://localhost:8080/items").content(new StringContentProvider(ev)).send();
+		int status = req.getStatus();
+		assertThat(status, is(201));
+		
 
+		ContentResponse res = client.GET("http://localhost:8080/items");
+		assertThat(res.getStatus(), is(200));
+		assertThat(res.getContentAsString(), is("[{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":123}}]"));
+	}
 }

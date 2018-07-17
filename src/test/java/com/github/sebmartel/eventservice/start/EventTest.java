@@ -22,21 +22,21 @@ public class EventTest {
 	@Test
 	public void testSerializationDeserialization() throws IOException {
 		
-		Item item = new Item(1, 2);
+		Item item = new Item(1451689261000l, 2);
 		Event ev = new Event(item);
 		
 		ObjectMapper om = new ObjectMapper();
 		String json = om.writeValueAsString(ev);
-		assertThat(json, is("{\"item\":{\"timestamp\":1,\"id\":2}}"));
+		assertThat(json, is("{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":2}}"));
 		
 		Event[] evs = { ev, ev };		
 		String jsonArray = om.writeValueAsString(evs);
-		assertThat(jsonArray, is("[{\"item\":{\"timestamp\":1,\"id\":2}},{\"item\":{\"timestamp\":1,\"id\":2}}]"));
+		assertThat(jsonArray, is("[{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":2}},{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":2}}]"));
 		
-		Event in = om.readValue("{\"item\":{\"timestamp\":1,\"id\":2}}", Event.class);
+		Event in = om.readValue("{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":2}}", Event.class);
 		assertThat(in, equalTo(ev));
-		
-	    Event[] ins = om.readValue("[{\"item\":{\"timestamp\":1,\"id\":2}},{\"item\":{\"timestamp\":1,\"id\":2}}]", Event[].class);
+	
+	    Event[] ins = om.readValue("[{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":2}},{\"item\":{\"timestamp\":\"2016-01-01T23:01:01.000Z\",\"id\":2}}]", Event[].class);
 	    assertThat(ins, equalTo(evs));
 	}
 }

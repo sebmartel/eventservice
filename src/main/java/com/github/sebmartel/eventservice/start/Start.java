@@ -1,6 +1,8 @@
 package com.github.sebmartel.eventservice.start;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 import javax.servlet.ServletException;
@@ -12,10 +14,13 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 /**
  * EventService application start
  * 
- * This is just scaffolding, not production ready.
+ * This is just scaffolding for demonstration purposes.
+ * 
  * 
  */
 public class Start implements Runnable {
@@ -49,6 +54,9 @@ public class Start implements Runnable {
 	}
 
 	private static Handler itemsHandler() {
+		
+		ObjectMapper mapper = new ObjectMapper();
+		SimpleEventStore store = new SimpleEventStore(Duration.ofMillis(2000), 100);
 
 		return new AbstractHandler() {
 
@@ -61,7 +69,7 @@ public class Start implements Runnable {
 					String method = baseRequest.getMethod();
 					switch (method) {
 					case "POST": handlePostItem(baseRequest, request, response); break;
-					case "GET": handleGetItems(baseRequest, request, response); break;
+					case "GET":  handleGetItems(baseRequest, request, response); break;
 					default:
 					}
 				}		
@@ -71,17 +79,16 @@ public class Start implements Runnable {
 				res.setContentType("application/json");
 				res.setStatus(200);
 				base.setHandled(true);
-				res.getWriter().println("hello world");
+				Collection<Event> collection = store.get();				
+				mapper.writeValue( res.getOutputStream(), collection );
 			}
 
 			private void handlePostItem(Request base, HttpServletRequest req, HttpServletResponse res) throws IOException {
-				String body = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
-				System.out.println( body );
 				
-				res.setContentType("application/json");
+				Event ev = mapper.readValue( req.getInputStream(), Event.class);
+				store.put(ev);
 				res.setStatus(201);
 				base.setHandled(true);
-				res.getWriter().println("hello world");
 			}
 		};
 	}
