@@ -79,7 +79,7 @@ public class Start implements Runnable {
 				res.setContentType("application/json");
 				res.setStatus(200);
 				base.setHandled(true);
-				Collection<Event> collection = store.get();				
+				Collection<Event> collection = store.get().stream().sorted().collect(Collectors.toList());				
 				mapper.writeValue( res.getOutputStream(), collection );
 			}
 
