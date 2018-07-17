@@ -105,15 +105,13 @@ leverage the fact that this ttl is known in advance and can be used to
 both order and evict in the sorted cache. It cannot be used as a key
 to ensure uniqueness however so the tll cache is still needed.
 
-An AtomicReferenceArray of size 2^n -1 large enough to cover the ttl
-in milliseconds (or whatever other granularity) can be the backing
-store. Each array position, or bucket, is easily accessible by masking
-off the upper bits representing the timestamp used for ordering.
-Storing the events in a ConcurrentSkipListMap yields a logN insertion
-time, but the N is bounded by the number of transactions over the
-slice of time allocated for each bucket.  For 100,000 tps hashed into
-a bucket holdiong a 1ms interval results in to 100 items: this N is
-very small.
+An AtomicReferenceArray of size large enough to cover the ttl in
+milliseconds (or whatever other granularity) can be the backing
+store. Storing the events in a ConcurrentSkipListMap yields a logN
+insertion time, but the N is bounded by the number of transactions
+over the slice of time allocated for each bucket.  For 100,000 tps
+hashed into a bucket holdiong a 1ms interval results in to 100 items:
+this N is very small.
 
 What is gained by any of these options is more predictable use of
 space for many concurrent GET /items. The result is a O(2N) use of
