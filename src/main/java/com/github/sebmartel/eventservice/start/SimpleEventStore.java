@@ -6,6 +6,7 @@ package com.github.sebmartel.eventservice.start;
 import java.time.Duration;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Ticker;
 import com.google.common.cache.Cache;
@@ -39,6 +40,8 @@ public class SimpleEventStore {
 	
 	public Collection<Event> get() {
 		Collection<Event> timed = lru.asMap().values();
-		return timed.parallelStream().count() < minCount ? fifo.asMap().values() : timed;
+		return timed.parallelStream().count() < minCount ? 
+				fifo.asMap().values().stream().limit(minCount).collect(Collectors.toList()) 
+				: timed;
 	}
 }

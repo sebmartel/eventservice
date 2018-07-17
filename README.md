@@ -73,6 +73,9 @@ Both caches are keyed by `id`, ensuring that `POST /events` is idempotent.
 
 Insertion is constant time.  Extracting items is O(N) on average where
 n is the number of items returned.  The API sorts them, so it's really
-O(N logN).
+O(2N logN) before serialization.
 
-
+Note that the backing data structure returned by the cache could be
+the cache backing the timed cache. This is simply to avoid needless
+data duplication and isn't a problem unless someone needs an
+accurate count.
