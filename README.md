@@ -79,3 +79,41 @@ Note that the backing data structure returned by the cache could be
 the cache backing the timed cache. This is simply to avoid needless
 data duplication and isn't a problem unless someone needs an
 accurate count.
+
+Space wise, the store is O(N) but at runtime, the memory needed is
+proportional to the number of concurrent GET /items (strictly speaking
+in terms of number of active references to items). Assuming a heavy
+load of 100,000 TPS , that would be 21 Mb of space to host the
+references needed to process the GET.
+
+If more than 1 concurrent GET is the norm, an improvement to the store
+would be to serve the results pre-sorted, which would enable the GET
+handler to serialize directly from the backing collection without
+having to sort into a temporary collection.
+
+The first question is to determine what sort is desired. It could be
+by id, by item timestamp or by arrival timestamp.  The implementation
+could use a ConcurrentSkipListMap keyed by the desired property to
+weak references of the events stored in the ttl cache. These could be
+hidden behind a Collection implementation that would dereference or
+skip the refernces during iteration.  A RemovalListener on the ttl
+cache could explicitely remove the entries in the sorted map whenever
+invoked to keep things tidy.
+
+If the sorted property is the arrival time, another option could be to
+leverage the fact that this is the same key as the ttl cache and use
+an AtomicReferenceArray of size 2^n -1 large enough to cover the ttl
+in milliseconds (or whatever other granularity).
+
+Each of array position, or bucket, is easily accessible by masking the
+upper bits representing the timestamp used for ordering. Storing the
+events in a ConcurrentSkipListMap yields a logN insertion time, but
+the N is bounded by the number of transactions over the slice of time
+allocated for each bucket.  For 100,000 tps hashed into a bucket for a
+1ms interval is about 1000 items: this N is very small.
+
+What is gained by any of these options is more predictable use of
+space for many concurrent GET /items, bounded by O(2N) with N being
+the total number of items returned, instead of O(MN) with M being the
+total number of concurrent GET.
+
