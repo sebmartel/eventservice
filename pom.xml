@@ -12,6 +12,7 @@
     <properties>
     	<jetty.version>9.4.11.v20180605</jetty.version>
     	<main-class>com.github.sebmartel.JettyStarter.start.Start</main-class>
+    	<jackson.version>2.9.6</jackson.version>
     </properties>
 	
 	<dependencies>
@@ -25,6 +26,21 @@
 			<artifactId>jetty-servlet</artifactId>
 			<version>${jetty.version}</version>
 		</dependency>
+		<dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>25.1-jre</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-core</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.core</groupId>
+		    <artifactId>jackson-databind</artifactId>
+		    <version>${jackson.version}</version>
+		</dependency>		
 	    <!-- Test dependencies -->
 		<dependency>
 			<groupId>junit</groupId>
@@ -43,8 +59,9 @@
 		    <artifactId>jetty-client</artifactId>
 			<version>${jetty.version}</version>
 			<scope>test</scope>
-		</dependency>		
+		</dependency>
 	</dependencies>
+
 
 	<build>
 		<plugins>
