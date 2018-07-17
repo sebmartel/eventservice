@@ -29,7 +29,7 @@ public class SimpleEventStore {
 	public SimpleEventStore(Duration ttl, int minCount, Ticker ticker) {
 		this.minCount = minCount;
 		lru = CacheBuilder.newBuilder().expireAfterWrite(ttl.toMillis(), TimeUnit.MILLISECONDS).ticker(ticker).build();
-		fifo = CacheBuilder.newBuilder().maximumSize(minCount).build();
+		fifo = CacheBuilder.newBuilder().maximumSize(minCount).ticker(ticker).build();
 	}
 	
 	public void put(Event ev) {

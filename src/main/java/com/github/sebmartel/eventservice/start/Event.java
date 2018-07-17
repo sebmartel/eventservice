@@ -10,7 +10,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @author seb
  *
  */
-public class Event {
+public class Event implements Comparable<Event>{
 	private final Item item;
 
 	@JsonCreator
@@ -59,4 +59,19 @@ public class Event {
 			return false;
 		return true;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return String.format("{ id: %d, timestamp: %d}", item.getId(), item.getTimestamp() );				
+	}
+
+	@Override
+	public int compareTo(Event o) {
+		long ts = item.getTimestamp() - o.item.getTimestamp();
+		return (int)(ts == 0 ? item.getId() - o.item.getId() : ts);
+	}
+	
 }
